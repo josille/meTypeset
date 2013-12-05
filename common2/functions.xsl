@@ -868,5 +868,79 @@ of this software, even if advised of the possibility of such damage.
       </xsl:choose>
     </xsl:for-each>
   </xsl:function>
+  
+  <doc xmlns="http://www.oxygenxml.com/ns/doc/xsl">
+    <desc>returns tru if node is header</desc>
+  </doc>
+  <xsl:function name="tei:isHeader" as="xs:boolean">
+    <xsl:param name="currNode"/>
+    <xsl:choose>
+      <xsl:when test="contains($currNode/@rend,'Heading') and matches($currNode,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+        true
+      </xsl:when>
+      <xsl:when test="$currNode/@rend='bold' and matches($currNode,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+        true
+      </xsl:when>      
+      <xsl:when test="$currNode/@rend='italic' and matches($currNode,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+        true
+      </xsl:when>
+      <xsl:when test="(contains($currNode/@rend,'Heading') or contains($currNode/@rend,'bold')) and $currNode/name()='p' and count($currNode/text())=1">
+        true
+      </xsl:when>
+      <xsl:when test="(contains($currNode/@rend,'italic') or contains($currNode/@rend,'bold')) and $currNode/name()='p' and count($currNode/text())=1">
+        true
+      </xsl:when>
+      <xsl:when test="count($currNode/child::node()[text()])=1">
+        <xsl:for-each select="$currNode/child::node()[text()]">
+          <xsl:choose>
+            <xsl:when test="name()='hi'">
+              <xsl:choose>
+                <xsl:when test="contains(@rend,'Heading') and matches(.,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+                  true
+                </xsl:when>
+                <xsl:when test="@rend='bold' and matches(.,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+                  true
+                </xsl:when>                 
+                <xsl:when test="@rend='italic' and matches(.,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')">
+                  true
+                </xsl:when>  
+                <xsl:when test="(contains(@rend,'Heading') or contains(@rend,'bold')) and count(text())=1">
+                  true
+                </xsl:when>
+                <!--xsl:when test="(contains(@rend,'italic') or contains(@rend,'bold')) and count(text())=1">
+                  true
+                </xsl:when-->
+                <xsl:otherwise>                  
+                  false
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+              false
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each>
+      </xsl:when>
+      <xsl:otherwise>
+        false
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
+  <doc xmlns="http://www.oxygenxml.com/ns/doc/xsl">
+    <desc>returns true if node is header</desc>
+  </doc>
+  <xsl:function name="tei:getNextHeader" as="node()">
+    <xsl:param name="currNode"/>
+    <!--xsl:for-each select="$currNode/following::*">
+      <xsl:if test="tei:isHeader(.)">
+        <xsl:value-of select="node()"></xsl:value-of>
+      </xsl:if>
+    </xsl:for-each-->
+    <xsl:value-of select="$currNode/following-sibling::node()[tei:isHeader(.)]"></xsl:value-of>
+    <!--xsl:if test="tei:isHeader($currNode/following::*)">
+      <xsl:value-of select="node()"></xsl:value-of>
+    </xsl:if-->
+  </xsl:function>
 
 </xsl:stylesheet>

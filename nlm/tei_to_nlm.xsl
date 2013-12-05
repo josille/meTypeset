@@ -253,7 +253,7 @@
 
       <!--Here's the meat of the document. -->
       <xsl:element name="body">
-
+        
         <xsl:apply-templates select="TEI/text/body"></xsl:apply-templates>
 
       </xsl:element>
@@ -381,15 +381,54 @@
   
 <!-- Block-level templates. -->
 <!--  Document divisions/sections. -->
-  <xsl:template match="div">
+  <xsl:template match="divvv">
     <xsl:element name="sec">
-<!-- If there's no title tag, we have to add an empty one. -->
+      <!-- If there's no title tag, we have to add an empty one. -->
       <xsl:if test="not(child::head)"><title></title></xsl:if>
       <xsl:apply-templates />
     </xsl:element>
   </xsl:template>
   
-  <xsl:template match="div/head">
+  <xsl:template match="div">
+    
+    <xsl:for-each-group select="child::node()" 
+      group-starting-with="*[(child::*[contains(@rend,'italic') or contains(@rend,'bold') or contains(@rend,'Heading')]
+      and child::*[matches(.,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')]) or (.[contains(@rend,'bold') or contains(@rend,'Heading')]
+      and matches(.,'^\s*\.*(\d+)(\.\-|\.|\-|\s)')) or (.[contains(@rend,'bold') or contains(@rend,'Heading')]
+      and count(text())=1)]">
+      <xsl:element name="sec">
+        <xsl:for-each select="current-group()">
+          <xsl:choose>
+            <xsl:when test="tei:isHeader(.)">                
+                <xsl:call-template name="makeTitle"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:choose>
+                <xsl:when test="position()=1 and not(tei:isHeader(.))">
+                  <xsl:element name="title"/>
+                </xsl:when>
+                <xsl:otherwise>                  
+                  <xsl:apply-templates select="."/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:otherwise>
+          </xsl:choose>             
+        </xsl:for-each>
+      </xsl:element>
+    </xsl:for-each-group>
+    
+  </xsl:template>
+  
+  
+  <xsl:template name="makeSection">
+    <xsl:element name="sec">
+      <!-- If there's no title tag, we have to add an empty one. -->
+      <xsl:if test="not(child::head)"><title></title></xsl:if>
+      <xsl:apply-templates />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="div/head" name="makeTitle">
     <xsl:element name="title">
       <xsl:apply-templates />
     </xsl:element>
@@ -409,6 +448,25 @@
       </xsl:choose>
     </xsl:element>    
   </xsl:template>
+  
+  
+  
+  <xsl:template name="makeParagrahSection">
+    <xsl:param name="type"/>
+    <xsl:element name="{$type}">
+      <xsl:choose>
+        <xsl:when test="./@rend">
+          <xsl:call-template name="doTags">
+            <xsl:with-param name="tags" select="./@rend"/>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>        
+          <xsl:apply-templates />
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:element> 
+  </xsl:template>
+ 
   
   <!-- New list types added, according to nlm 
   order           Ordered list. Prefix character is a number or a letter, depending on style.
@@ -926,9 +984,12 @@ have a shot at styling it. -->
   
 <!--  Text style markup. -->  
   <xsl:template match="hi">
-    <!--xsl:choose>
-      <xsl:when test="normalize-space(./text()) = ''">
-        <xsl:apply-templates/>
+    <!--xsl:choose>      
+      <xsl:when test="contains(@rend,'Heading') and matches(.,'(.*)\.*(\d+)(\.\-|\.|\-|\s)(\D*)')">
+        <xsl:call-template name="makeTitle"/>
+      </xsl:when>
+      <xsl:when test="@rend='bold' and matches(.,'(.*)\.*(\d+)(\.\-|\.|\-|\s)(\D*)')">
+        <xsl:call-template name="makeTitle"/>
       </xsl:when>
       <xsl:otherwise-->        
         <xsl:call-template name="doTags">

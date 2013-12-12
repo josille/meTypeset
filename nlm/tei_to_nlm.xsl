@@ -402,6 +402,9 @@
             <xsl:when test="tei:isHeader(.)">                
                 <xsl:call-template name="makeTitle"/>
             </xsl:when>
+            <xsl:when test="tei:isChildHeader(.)">                
+              <xsl:call-template name="makeChildTitle"/>
+            </xsl:when>
             <xsl:otherwise>
               <xsl:choose>
                 <xsl:when test="position()=1 and not(tei:isHeader(.))">
@@ -432,6 +435,37 @@
     <xsl:element name="title">
       <xsl:apply-templates />
     </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="div/head" name="makeChildTitle">
+    <xsl:element name="title">
+      <xsl:apply-templates select="./hi" />
+    </xsl:element>
+    <xsl:choose>
+      <xsl:when test="count(hi/following-sibling::node())>1">
+        <xsl:element name="p">
+          <xsl:choose>
+            <xsl:when test="hi/following-sibling::node()/@rend">
+              <xsl:call-template name="doTags">
+                <xsl:with-param name="tags" select="hi/following-sibling::node()/@rend"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>        
+              <xsl:apply-templates select="hi/following-sibling::node()" />
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:element>  
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:if test="not(normalize-space(hi/following-sibling::node())='')">
+          <xsl:apply-templates select="hi/following-sibling::node()" />
+        </xsl:if>
+      </xsl:otherwise>
+    </xsl:choose>
+     
+      
+    
+    
   </xsl:template>
   
   <xsl:template match="p | ab">

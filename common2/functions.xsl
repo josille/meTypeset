@@ -889,7 +889,19 @@ of this software, even if advised of the possibility of such damage.
       </xsl:when>
       <xsl:when test="(contains($currNode/@rend,'italic') or contains($currNode/@rend,'bold')) and $currNode/name()='p' and count($currNode/text())=1">
         true
-      </xsl:when>
+      </xsl:when>      
+      <xsl:otherwise>
+        false
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
+  <doc xmlns="http://www.oxygenxml.com/ns/doc/xsl">
+    <desc>returns true if node is a child header</desc>
+  </doc>
+  <xsl:function name="tei:isChildHeader" as="xs:boolean">
+    <xsl:param name="currNode"/>
+    <xsl:choose>      
       <xsl:when test="count($currNode/child::node()[text()])=1">
         <xsl:for-each select="$currNode/child::node()[text()]">
           <xsl:choose>

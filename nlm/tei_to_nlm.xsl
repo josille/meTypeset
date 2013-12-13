@@ -433,13 +433,15 @@
   
   <xsl:template match="div/head" name="makeTitle">
     <xsl:element name="title">
-      <xsl:apply-templates />
+      <!--xsl:apply-templates /-->
+      <xsl:value-of select="."/>
     </xsl:element>
   </xsl:template>
   
   <xsl:template match="div/head" name="makeChildTitle">
     <xsl:element name="title">
-      <xsl:apply-templates select="./hi" />
+      <!--xsl:apply-templates select="./hi" /-->
+      <xsl:value-of select="./hi"/>
     </xsl:element>
     <xsl:choose>
       <xsl:when test="count(hi/following-sibling::node())>1">
